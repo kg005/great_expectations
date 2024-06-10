@@ -336,7 +336,9 @@ def type_check(  # noqa: C901, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
+UNIT_TEST_DEFAULT_TIMEOUT: float = (
+    2.0  # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+)
 
 
 @invoke.task(
@@ -606,6 +608,16 @@ def type_schema(  # noqa: C901 - too complex
         core.ExpectTableColumnCountToBeBetween,
         core.ExpectTableRowCountToEqualOtherTable,
         core.ExpectColumnPairValuesToBeInSet,
+        core.ExpectColumnProportionOfUniqueValuesToBeBetween,
+        core.ExpectColumnUniqueValueCountToBeBetween,
+        core.ExpectColumnDistinctValuesToBeInSet,
+        core.ExpectColumnDistinctValuesToContainSet,
+        core.ExpectColumnDistinctValuesToEqualSet,
+        core.ExpectColumnMostCommonValueToBeInSet,
+        core.ExpectColumnStdevToBeBetween,
+        core.ExpectColumnSumToBeBetween,
+        core.ExpectColumnKLDivergenceToBeLessThan,
+        core.ExpectColumnQuantileValuesToBeBetween,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
@@ -1085,7 +1097,7 @@ def ci_tests(  # noqa: C901 - too complex (9)
     pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_options.append("-n auto")
+        pytest_options.append("-n 4")
 
     if timeout != 0:
         pytest_options.append(f"--timeout={timeout}")
